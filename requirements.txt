@@ -1,0 +1,6 @@
+Django>=4.0, <5.0
+psycopg2>=2.8
+django-environ
+djangorestframework
+markdown
+django-filter
