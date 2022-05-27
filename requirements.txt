@@ -4,3 +4,4 @@ django-environ
 djangorestframework
 markdown
 django-filter
+requests

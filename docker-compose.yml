@@ -9,10 +9,6 @@ services:
       - .:/usr/src/app/
     ports:
       - "8000:8000"
-    environment:
-      - POSTGRES_NAME={DATABASE_NAME}
-      - DATABASE_USER={DATABASE_USER}
-      - POSTGRES_PASSWORD={DATABASE_PASSWORD}
     env_file:
       - .env
     depends_on:
@@ -20,10 +16,8 @@ services:
   postgresdb:
     image: postgres
     container_name: postgresdb
-    environment:
-      - POSTGRES_DB={DATABASE_NAME}
-      - POSTGRES_USER={DATABASE_USER}
-      - POSTGRES_PASSWORD={DATABASE_PASSWORD}
+    env_file:
+      - .env
     volumes:
       - pgdata:/var/lib/postgresql/data/
 
