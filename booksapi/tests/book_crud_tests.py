@@ -1,21 +1,19 @@
-from telnetlib import STATUS
 from rest_framework.test import APITestCase
 from django.urls import reverse
 from booksapi.models import Book, Author
-from booksapi.views import BookViewSet
 from rest_framework import status
-import json
+
 
 class TestCRUDBooks(APITestCase):
     def setUp(self):
         self.list_url = reverse('books-list')
         self.book1 = Book.objects.create(**{
-                "external_id": "rToaogEACAAJ",
-                "title": "Hobbit czyli Tam i z powrotem",
-                "acquired": False,
-                "published_year": "2004",
-                "thumbnail": "http://books.google.com/books/content?id=YyXoAAAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
-            })
+            "external_id": "rToaogEACAAJ",
+            "title": "Hobbit czyli Tam i z powrotem",
+            "acquired": False,
+            "published_year": "2004",
+            "thumbnail": "http://books.google.com/books/content?id=YyXoAAAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        })
         self.author1 = Author.objects.create(full_name="J. R. R. Tolkien")
         self.book1.authors.add(self.author1)
         self.author2 = Author.objects.create(full_name="Kenneth Sisam")
@@ -41,7 +39,6 @@ class TestCRUDBooks(APITestCase):
         self.author3 = Author.objects.create(full_name="John J. Fay")
         self.book3.authors.add(self.author3)
 
-
         self.book4 = Book.objects.create(
             **{
                 "external_id": "OMOwmLgbMfYC",
@@ -57,28 +54,28 @@ class TestCRUDBooks(APITestCase):
         self.url = '/books'
         self.detail_url = f'{self.url}/{str(self.book1.id)}'
 
-
     def test_get_books(self):
-        response = self.client.get(self.url) 
+        response = self.client.get(self.url)
         response_book_ids = [book['id'] for book in response.data]
-        self.assertEqual(response_book_ids, [self.book1.id, self.book2.id, self.book3.id, self.book4.id])
+        self.assertEqual(response_book_ids, [
+                         self.book1.id, self.book2.id, self.book3.id, self.book4.id])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-    
+
     def test_filter_books(self):
         query = '?author="Tolkien"&from=2003&to=2022&acquired=false'
         url = self.url + query
-        response = self.client.get(url) 
+        response = self.client.get(url)
         response_book_ids = [book['id'] for book in response.data]
         self.assertEqual(response_book_ids, [self.book1.id, self.book2.id])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-    
+
     def test_book_detail(self):
         response = self.client.get(self.detail_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['id'], self.book1.id)
-        self.assertEqual(list(response.data.keys()), ['id', 'authors', 'external_id', 'title', 'published_year', 'acquired', 'thumbnail'])
-    
+        self.assertEqual(list(response.data.keys()), [
+                         'id', 'authors', 'external_id', 'title', 'published_year', 'acquired', 'thumbnail'])
 
     def test_book_create(self):
         book_data = {
@@ -88,13 +85,14 @@ class TestCRUDBooks(APITestCase):
             "published_year": "2022",
             "acquired": True,
             "thumbnail": None
-            }
+        }
 
         response = self.client.post(self.url, book_data, format='json')
         response_data = response.data
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(list(response.data.keys()), ['id', 'authors', 'external_id', 'title', 'published_year', 'acquired', 'thumbnail'])
+        self.assertEqual(list(response.data.keys()), [
+                         'id', 'authors', 'external_id', 'title', 'published_year', 'acquired', 'thumbnail'])
         response_data.pop('id', None)
         self.assertEqual(response.data, book_data)
 
@@ -103,28 +101,11 @@ class TestCRUDBooks(APITestCase):
         response = self.client.patch(self.detail_url, patch_data)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(list(response.data.keys()), ['id', 'authors', 'external_id', 'title', 'published_year', 'acquired', 'thumbnail'])
+        self.assertEqual(list(response.data.keys()), [
+                         'id', 'authors', 'external_id', 'title', 'published_year', 'acquired', 'thumbnail'])
         self.assertEqual(response.data['acquired'], patch_data['acquired'])
-
 
     def test_book_delete(self):
         response = self.client.delete(self.detail_url)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-    
-
-class TestImportBooks(APITestCase):
-    def setUp(self):
-        self.url = '/import'
-
-    def test_import_books(self):
-        data = {"author": "Daniel Singer"}
-        response = self.client.post(self.url, data)
-        response_keys = list(response.data.keys())
-        response_data = response.data
-
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK) # 201_CREATED
-        self.assertEqual(response_keys, ["imported"])
-        imported = response_data.pop('imported', 0)
-        self.assertNotEqual(imported, 0)

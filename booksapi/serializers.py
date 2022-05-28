@@ -1,16 +1,19 @@
 from rest_framework import serializers
 from booksapi.models import Book, Author
 
+
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author
-        fields = ['full_name',]
-    
+        fields = ['full_name', ]
+
     def to_representation(self, value):
         return value.full_name
-    
+
+
 class BookSerializer(serializers.ModelSerializer):
     authors = AuthorSerializer(many=True, read_only=True)
+
     class Meta:
         model = Book
         fields = '__all__'
