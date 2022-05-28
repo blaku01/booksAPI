@@ -43,14 +43,6 @@ class BookViewSet(viewsets.ModelViewSet):
         serializer_data['authors'] = authors
         return Response(serializer_data, status=status.HTTP_201_CREATED)
 
-        {
-            "external_id": null,
-            "title": "Magiczna księga",
-            "authors": [],
-            "published_year": "2022",
-            "acquired": true,
-            "thumbnail": null
-        }
 
     def get_queryset(self):
         year_from = self.request.query_params.get('from')
@@ -93,12 +85,14 @@ class ImportBooksView(APIView):
         
         authors_dict = {}
         if res.status_code == 200:
+            imported = 0
             for book_data in data:
                 external_id = book_data.get('id')
                 book_data = book_data.get('volumeInfo')
                 published_year = book_data.get('publishedDate')
                 title=book_data.get('title')
                 if title is not None:
+                    imported += 1
                     if published_year is not None:
                         published_year = int(published_year[:4])
 
@@ -121,7 +115,7 @@ class ImportBooksView(APIView):
                         )[0]
                     author_indexes = [authors_dict[author] for author in book_authors]
                     book.authors.set(author_indexes)
-            return Response({"imported": total_books}, status=status.HTTP_200_OK)
+            return Response({"imported": imported}, status=status.HTTP_200_OK)
 
 
 

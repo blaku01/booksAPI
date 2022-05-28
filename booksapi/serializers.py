@@ -16,7 +16,7 @@ class BookSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Book
-        fields = '__all__'
+        fields = ['id','external_id','title','authors','published_year','acquired','thumbnail']
         depth = 1
 
     def to_representation(self, instance):

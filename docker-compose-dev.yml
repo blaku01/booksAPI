@@ -4,20 +4,20 @@ services:
   django:
     build: .
     container_name: django
-    command: python manage.py runserver 0.0.0.0:8000
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - .:/usr/src/app/
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - .dev.env
     depends_on:
       - postgresdb
   postgresdb:
     image: postgres
     container_name: postgresdb
     env_file:
-      - .env
+      - .dev.env
     volumes:
       - pgdata:/var/lib/postgresql/data/
 
