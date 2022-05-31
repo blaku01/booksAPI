@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from booksapi.models import Book, Author
-
+from .validators import year_not_from_future
 
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,4 +22,8 @@ class BookSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super(BookSerializer, self).to_representation(instance)
         data['published_year'] = str(data['published_year'])
+        return data
+
+    def validate(self, data):
+        year_not_from_future(data['published_year'])
         return data
